@@ -75,7 +75,7 @@ class Tiempo(models.Model):
 class TipoTicket(models.Model):
     tip_p_id = models.AutoField(primary_key=True)
     tip_c_nombre = models.CharField(max_length=50)
-    tip_c_detalle = models.CharField(max_length=50)
+    tip_c_detalle = models.CharField(max_length=100)
 
     def __str__(self):
         return self.tip_c_nombre
