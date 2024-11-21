@@ -4,31 +4,195 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Ticket</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #e3f2fd; /* Fondo azul claro */
+        }
+
+        #menu-lateral {
+            width: 15%;
+            min-width: 200px;
+            background-color: #00796b; /* Color oscuro del menú */
+            color: white;
+            padding: 20px 15px;
+            height: auto; /* Altura completa de la página */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        #menu-lateral h1 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        #menu-lateral a {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            margin: 10px 0;
+            padding: 10px 15px;
+            border-radius: 5px;
+            display: block;
+            text-align: left;
+            transition: background-color 0.3s ease;
+        }
+
+        #menu-lateral a:hover {
+            background-color: #004d40; /* Color más oscuro al pasar el mouse */
+        }
+
+        #menu-lateral .menu-footer {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #b2dfdb;
+        }
+
+        #menu-lateral .menu-footer a {
+            color: #80cbc4;
+            text-decoration: none;
+        }
+
+        .main-content {
+            width: 85%;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .main-content h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form-section {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid #d1e7ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-section h3 {
+            margin-bottom: 15px;
+        }
+
+        .form-section div {
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #00796b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #004d40;
+        }
+    </style>
 </head>
 <body>
-    <h1>Crear Ticket</h1>
-    <form method="post">
-        {% csrf_token %}
-        <h3>Campos Relacionados</h3>
-        {{ form.usuario.label_tag }} {{ form.usuario }}
-        {{ form.estado.label_tag }} {{ form.estado }}
-        {{ form.prioridad.label_tag }} {{ form.prioridad }}
-        {{ form.tipo_ticket.label_tag }} {{ form.tipo_ticket }}
-        {{ form.cliente.label_tag }} {{ form.cliente }}
+    <div style="display: flex;">
+        <!-- Menú lateral -->
+        <div id="menu-lateral">
+            <div>
+                <h1>Ticketera</h1>
+                <a href="{% url 'ticket_create' %}">Crear Nuevo Ticket</a>
+                <a href="{% url 'ticket_list' %}">Ver Tickets</a>
+                <a href="#">Reportes</a>
+                <a href="#">Configuración</a>
+            </div>
+            <div class="menu-footer">
+                <p>&copy; 2024 Ticketera</p>
+                <a href="#">Soporte</a>
+            </div>
+        </div>
 
-        <h3>Nueva Descripción</h3>
-        {{ form.descripcion_nombre.label_tag }} {{ form.descripcion_nombre }}
-
-        <h3>Nuevo Tiempo</h3>
-        {{ form.tiempo_hora_inicio.label_tag }} {{ form.tiempo_hora_inicio }}
-        {{ form.tiempo_hora_fin.label_tag }} {{ form.tiempo_hora_fin }}
-        {{ form.tiempo_duracion.label_tag }} {{ form.tiempo_duracion }}
-
-        <h3>Nuevo Requerimiento</h3>
-        {{ form.requerimiento_detalle.label_tag }} {{ form.requerimiento_detalle }}
-        {{ form.requerimiento_observacion.label_tag }} {{ form.requerimiento_observacion }}
-
-        <button type="submit">Guardar</button>
-    </form>
+        <!-- Contenido principal -->
+        <div class="main-content">
+            <h1>Crear Ticket</h1>
+            <form method="post">
+                {% csrf_token %}
+                
+                <!-- Campos Relacionados -->
+                <div class="form-section">
+                    <h3>Campos Relacionados</h3>
+                    <div>
+                        {{ form.usuario.label_tag }} {{ form.usuario }}
+                    </div>
+                    <div>
+                        {{ form.estado.label_tag }} {{ form.estado }}
+                    </div>
+                    <div>
+                        {{ form.prioridad.label_tag }} {{ form.prioridad }}
+                    </div>
+                    <div>
+                        {{ form.tipo_ticket.label_tag }} {{ form.tipo_ticket }}
+                    </div>
+                    <div>
+                        {{ form.cliente.label_tag }} {{ form.cliente }}
+                    </div>
+                </div>
+                
+                <!-- Nueva Descripción -->
+                <div class="form-section">
+                    <h3>Nueva Descripción</h3>
+                    <div>
+                        {{ form.descripcion_nombre.label_tag }} {{ form.descripcion_nombre }}
+                    </div>
+                </div>
+                
+                <!-- Nuevo Tiempo -->
+                <div class="form-section">
+                    <h3>Nuevo Tiempo</h3>
+                    <div>
+                        {{ form.tiempo_hora_inicio.label_tag }} {{ form.tiempo_hora_inicio }}
+                    </div>
+                    <div>
+                        {{ form.tiempo_hora_fin.label_tag }} {{ form.tiempo_hora_fin }}
+                    </div>
+                    <div>
+                        {{ form.tiempo_duracion.label_tag }} {{ form.tiempo_duracion }}
+                    </div>
+                </div>
+                
+                <!-- Nuevo Requerimiento -->
+                <div class="form-section">
+                    <h3>Nuevo Requerimiento</h3>
+                    <div>
+                        {{ form.requerimiento_detalle.label_tag }} {{ form.requerimiento_detalle }}
+                    </div>
+                    <div>
+                        {{ form.requerimiento_observacion.label_tag }} {{ form.requerimiento_observacion }}
+                    </div>
+                </div>
+    
+                <!-- Botón -->
+                <div style="text-align: right;">
+                    <button type="submit">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <footer style="background-color: #004d40; color: white; padding: 20px; text-align: center;">
+        <div>
+            <p>&copy; 2024 Ticketera. Todos los derechos reservados.</p>
+            <p>
+                <a href="#" style="color: #80cbc4; text-decoration: none;">Política de Privacidad</a> |
+                <a href="#" style="color: #80cbc4; text-decoration: none;">Términos y Condiciones</a> |
+                <a href="#" style="color: #80cbc4; text-decoration: none;">Soporte</a>
+            </p>
+        </div>
+    </footer>
+    
 </body>
 </html>
