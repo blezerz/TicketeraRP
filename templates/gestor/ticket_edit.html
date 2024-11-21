@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Ticket</title>
+</head>
+<body>
+    <h1>Editar Ticket</h1>
+    <form method="post">
+        {% csrf_token %}
+        <h3>Editar Campos Relacionados</h3>
+        {{ form.usuario.label_tag }} {{ form.usuario }}
+        {{ form.estado.label_tag }} {{ form.estado }}
+        {{ form.prioridad.label_tag }} {{ form.prioridad }}
+        {{ form.tipo_ticket.label_tag }} {{ form.tipo_ticket }}
+        {{ form.cliente.label_tag }} {{ form.cliente }}
+
+        <h3>Editar Descripción</h3>
+        {{ form.descripcion_texto.label_tag }} {{ form.descripcion_texto }}
+
+        <h3>Editar Tiempo</h3>
+        {{ form.tiempo_inicio.label_tag }} {{ form.tiempo_inicio }}
+        {{ form.tiempo_fin.label_tag }} {{ form.tiempo_fin }}
+        {{ form.tiempo_duracion.label_tag }} {{ form.tiempo_duracion }}
+
+        <h3>Editar Requerimiento</h3>
+        {{ form.requerimiento_detalle.label_tag }} {{ form.requerimiento_detalle }}
+        {{ form.requerimiento_observacion.label_tag }} {{ form.requerimiento_observacion }}
+
+        <button type="submit">Guardar Cambios</button>
+    </form>
+    <a href="{% url 'ticket_list' %}">Cancelar</a>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Ticket</title>
+</head>
+<body>
+    <h1>Detalle del Ticket</h1>
+    <p><strong>ID:</strong> {{ ticket.id }}</p>
+    <p><strong>Usuario:</strong> {{ ticket.usuario }}</p>
+    <p><strong>Cliente:</strong> {{ ticket.cliente }}</p>
+    <p><strong>Estado:</strong> {{ ticket.estado }}</p>
+    <p><strong>Prioridad:</strong> {{ ticket.prioridad }}</p>
+    <p><strong>Tipo de Ticket:</strong> {{ ticket.tipo_ticket }}</p>
+    <p><strong>Descripción:</strong> {{ ticket.descripcion }}</p>
+    <p><strong>Tiempo:</strong> {{ ticket.tiempo }}</p>
+    <p><strong>Requerimiento:</strong> {{ ticket.requerimiento }}</p>
+
+    <a href="{% url 'ticket_list' %}">Volver a la lista</a>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Ticket</title>
+</head>
+<body>
+    <h1>Crear Ticket</h1>
+    <form method="post">
+        {% csrf_token %}
+        <h3>Campos Relacionados</h3>
+        {{ form.usuario.label_tag }} {{ form.usuario }}
+        {{ form.estado.label_tag }} {{ form.estado }}
+        {{ form.prioridad.label_tag }} {{ form.prioridad }}
+        {{ form.tipo_ticket.label_tag }} {{ form.tipo_ticket }}
+        {{ form.cliente.label_tag }} {{ form.cliente }}
+
+        <h3>Nueva Descripción</h3>
+        {{ form.descripcion_nombre.label_tag }} {{ form.descripcion_nombre }}
+
+        <h3>Nuevo Tiempo</h3>
+        {{ form.tiempo_hora_inicio.label_tag }} {{ form.tiempo_hora_inicio }}
+        {{ form.tiempo_hora_fin.label_tag }} {{ form.tiempo_hora_fin }}
+        {{ form.tiempo_duracion.label_tag }} {{ form.tiempo_duracion }}
+
+        <h3>Nuevo Requerimiento</h3>
+        {{ form.requerimiento_detalle.label_tag }} {{ form.requerimiento_detalle }}
+        {{ form.requerimiento_observacion.label_tag }} {{ form.requerimiento_observacion }}
+
+        <button type="submit">Guardar</button>
+    </form>
+</body>
+</html>

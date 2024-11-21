@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Tickets</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lista de Tickets</h1>
+
+    <a href="{% url 'ticket_create' %}" style="margin-bottom: 20px; display: inline-block;">Crear Nuevo Ticket</a>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Usuario</th>
+                <th>Cliente</th>
+                <th>Estado</th>
+                <th>Prioridad</th>
+                <th>Tipo</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ticket in tickets %}
+                <tr>
+                    <td>{{ ticket.id }}</td>
+                    <td>{{ ticket.usuario }}</td>
+                    <td>{{ ticket.cliente }}</td>
+                    <td>{{ ticket.estado }}</td>
+                    <td>{{ ticket.prioridad }}</td>
+                    <td>{{ ticket.tipo_ticket }}</td>
+                    <td>
+                        <a href="{% url 'ticket_detail' ticket.id %}">Ver</a>
+                        <a href="{% url 'ticket_edit' ticket.id %}">Editar</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7">No hay tickets disponibles.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
