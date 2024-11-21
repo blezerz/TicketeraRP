@@ -98,6 +98,19 @@
         button:hover {
             background-color: #004d40;
         }
+
+        @font-face {
+            font-family: 'VintageKing';
+            src: url('/static/fonts/VintageKing.ttf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        #tit-menu {
+            font-size: 45px !important;
+            font-family: 'VintageKing';
+        }
+        
     </style>
 </head>
 <body>
@@ -105,7 +118,7 @@
         <!-- Menú lateral -->
         <div id="menu-lateral">
             <div>
-                <h1>Ticketera</h1>
+                <h1 id="tit-menu">Ticketera</h1>
                 <a href="{% url 'ticket_create' %}">Crear Nuevo Ticket</a>
                 <a href="{% url 'ticket_list' %}">Ver Tickets</a>
                 <a href="#">Reportes</a>
@@ -138,14 +151,11 @@
                     <div>
                         {{ form.tipo_ticket.label_tag }} {{ form.tipo_ticket }}
                     </div>
-                    <div>
-                        {{ form.cliente.label_tag }} {{ form.cliente }}
-                    </div>
                 </div>
                 
                 <!-- Nueva Descripción -->
                 <div class="form-section">
-                    <h3>Nueva Descripción</h3>
+                    <h3>Descripción <p style="color:rgba(0, 0, 0, 0.3); font-size:15px; margin:0;">(descripcion del gestor para el ticket)</p></h3>
                     <div>
                         {{ form.descripcion_nombre.label_tag }} {{ form.descripcion_nombre }}
                     </div>
@@ -153,7 +163,7 @@
                 
                 <!-- Nuevo Tiempo -->
                 <div class="form-section">
-                    <h3>Nuevo Tiempo</h3>
+                    <h3>Tiempo</h3>
                     <div>
                         {{ form.tiempo_hora_inicio.label_tag }} {{ form.tiempo_hora_inicio }}
                     </div>
@@ -167,7 +177,10 @@
                 
                 <!-- Nuevo Requerimiento -->
                 <div class="form-section">
-                    <h3>Nuevo Requerimiento</h3>
+                    <h3>Requerimiento  <p style="color:rgba(0, 0, 0, 0.3); font-size:15px; margin:0;">(requerimiento que solicita el cliente)</p></h3>
+                    <div>
+                        {{ form.cliente.label_tag }} {{ form.cliente }}
+                    </div>
                     <div>
                         {{ form.requerimiento_detalle.label_tag }} {{ form.requerimiento_detalle }}
                     </div>

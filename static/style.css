@@ -1,0 +1,10 @@
+@font-face {
+    font-family: 'MiFuente';
+    src: url('/static/fonts/MiFuente.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    font-family: 'MiFuente', Arial, sans-serif;
+}

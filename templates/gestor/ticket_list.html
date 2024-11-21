@@ -11,11 +11,14 @@
             margin: 0;
             font-family: Arial, sans-serif;
             background-color: #e3f2fd; /* Fondo azul claro */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Altura mínima de toda la página */
         }
 
         #main-pag {
-            width: auto;
-            height: auto;
+            display: flex;
+            flex: 1; /* Asegura que el contenido principal ocupe todo el espacio disponible */
         }
 
         #menu-lateral {
@@ -24,7 +27,6 @@
             background-color: #00796b; /* Color oscuro del menú */
             color: white;
             padding: 20px 15px;
-            height: auto; /* Altura completa de la página */
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -66,12 +68,10 @@
         }
 
         .main-content {
-            width: 84%; /* Ancho para que el menú lateral de 16% encaje perfectamente */
+            flex: 1; /* Ocupa todo el espacio disponible */
             padding: 20px;
             background-color: rgba(255, 255, 255, 0.8); /* Fondo blanco con opacidad */
-            margin-left: auto; /* Alinea a la derecha del menú */
         }
-        
 
         .main-content h1 {
             text-align: center;
@@ -130,10 +130,26 @@
         button:hover {
             background-color: #004d40;
         }
+
+        footer {
+            background-color: #004d40;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        footer a {
+            color: #80cbc4;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
-    <div id="main-pag" style="display: flex;">
+    <div id="main-pag">
         <!-- Menú lateral -->
         <div id="menu-lateral">
             <div>
@@ -187,16 +203,13 @@
             </table>
         </div>
     </div>
-    <footer style="background-color: #004d40; color: white; padding: 20px; text-align: center;">
-        <div>
-            <p>&copy; 2024 Ticketera. Todos los derechos reservados.</p>
-            <p>
-                <a href="#" style="color: #80cbc4; text-decoration: none;">Política de Privacidad</a> |
-                <a href="#" style="color: #80cbc4; text-decoration: none;">Términos y Condiciones</a> |
-                <a href="#" style="color: #80cbc4; text-decoration: none;">Soporte</a>
-            </p>
-        </div>
+    <footer>
+        <p>&copy; 2024 Ticketera. Todos los derechos reservados.</p>
+        <p>
+            <a href="#">Política de Privacidad</a> |
+            <a href="#">Términos y Condiciones</a> |
+            <a href="#">Soporte</a>
+        </p>
     </footer>
-    
 </body>
 </html>
