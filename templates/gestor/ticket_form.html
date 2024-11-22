@@ -7,6 +7,7 @@
 </head>
 <body>
     <h1>Crear Ticket</h1>
+    <a href="{% url 'logout' %}" class="btn btn-danger">Cerrar sesión</a>
     <form method="post">
         {% csrf_token %}
         <h3>Campos Relacionados</h3>

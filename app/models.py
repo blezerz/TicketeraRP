@@ -87,6 +87,7 @@ class Usuario(models.Model):
     usuar_c_nombre = models.CharField(max_length=100)
     usuar_b_estado = models.BooleanField(default=True)
     usuar_n_rut = models.IntegerField(null=True, blank=True)
+    password = models.CharField(max_length=12, default='secret')
 
     def __str__(self):
         return self.usuar_c_nombre

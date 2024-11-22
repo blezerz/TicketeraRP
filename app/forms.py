@@ -1,5 +1,9 @@
 from django import forms
-from .models import Ticket, Descripcion, Tiempo, Requerimiento
+from .models import Ticket, Descripcion, Tiempo, Requerimiento,Usuario
+
+class LoginForm(forms.Form):
+    username = forms.CharField(label="Nombre de usuario", max_length=100, required=True)
+    password = forms.CharField(label="Contraseña", widget=forms.PasswordInput, required=True)
 
 class TicketForm(forms.ModelForm):
     class Meta:

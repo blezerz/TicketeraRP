@@ -1,17 +1,66 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
-from .forms import TicketForm, TicketEditForm
-from .models import Ticket
+from django.contrib import messages
+from .forms import TicketForm, TicketEditForm, LoginForm
+from .models import Ticket, Usuario
 from django.views.generic import DetailView, UpdateView
 from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+def login(request):
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            try:
+                # Buscar el usuario con el nombre proporcionado
+                usuario = Usuario.objects.get(usuar_c_nombre=username)
+                
+                # Comparar la contraseña proporcionada con la almacenada en la base de datos
+                if password == usuario.password:  # Comparación directa
+                    # Iniciar sesión
+                    request.session['usuario_id'] = usuario.id
+                    request.session['usuario_nombre'] = usuario.usuar_c_nombre
+                    messages.success(request, f"Bienvenido, {usuario.usuar_c_nombre}")
+                    return redirect('/tickets')  # Redirige a la lista de tickets
+                else:
+                    # Contraseña incorrecta
+                    messages.error(request, "Contraseña incorrecta.")
+            except Usuario.DoesNotExist:
+                # Usuario no encontrado
+                messages.error(request, "Usuario no encontrado.")
+        else:
+            # Formulario inválido
+            messages.error(request, "Formulario inválido")
+    else:
+        form = LoginForm()
+    return render(request, 'login.html', {'form': form})
+
+
+
+
+
+def logout(request):
+    # Cierra la sesión del usuario
+    request.session.flush()  # Elimina todos los datos de la sesión actual
+    messages.success(request, "Has cerrado sesión exitosamente.")
+    return redirect('/login/') 
+
+
 
 
 class TicketCreateView(View):
+    
     def get(self, request):
+        if 'usuario_id' not in request.session:
+            return redirect('/login/')
         form = TicketForm()
         return render(request, 'gestor/ticket_form.html', {'form': form})
 
     def post(self, request):
+        if 'usuario_id' not in request.session:
+            return redirect('/login/')
         form = TicketForm(request.POST)
         if form.is_valid():
             form.save()  # Se encarga de guardar los datos en todas las tablas relacionadas
@@ -20,7 +69,10 @@ class TicketCreateView(View):
 
 
 class TicketListView(View):
+    
     def get(self, request):
+        if 'usuario_id' not in request.session:
+            return redirect('/login/')
         # Obtenemos todos los tickets de la base de datos
         tickets = Ticket.objects.all()
         return render(request, 'gestor/ticket_list.html', {'tickets': tickets})
