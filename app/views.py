@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib import messages
-from .forms import TicketForm, TicketEditForm, LoginForm
-from .models import Ticket, Usuario
-from django.views.generic import DetailView, UpdateView
+from .forms import TicketForm, TicketEditForm, LoginForm, RequerimientoForm
+from .models import Ticket, Usuario, Requerimiento
+from django.views.generic import DetailView, UpdateView, ListView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 
@@ -67,6 +67,22 @@ class TicketCreateView(View):
             return redirect('ticket_list')  # Cambia 'ticket_list' según el nombre de tu vista de listado
         return render(request, 'gestor/ticket_form.html', {'form': form})
 
+# class TicketCreateReque(View):
+    
+#     def get(self, request):
+#         if 'usuario_id' not in request.session:
+#             return redirect('/login/')
+#         form = TicketForm()
+#         return render(request, 'gestor/ticket_reque.html', {'form': form})
+
+#     def post(self, request):
+#         if 'usuario_id' not in request.session:
+#             return redirect('/login/')
+#         form = TicketForm(request.POST)
+#         if form.is_valid():
+#             form.save()  # Se encarga de guardar los datos en todas las tablas relacionadas
+#             return redirect('ticket_list')  # Cambia 'ticket_list' según el nombre de tu vista de listado
+#         return render(request, 'gestor/ticket_reque.html', {'form': form})
 
 class TicketListView(View):
     
@@ -91,3 +107,36 @@ class TicketUpdateView(UpdateView):
     form_class = TicketEditForm
     template_name = 'gestor/ticket_edit.html'  # Reusamos el formulario de creación
     success_url = reverse_lazy('ticket_list')   # Redirige a la lista de tickets tras guardar
+
+
+class RequerimientoListView(View):
+    def get(self, request):
+        if 'usuario_id' not in request.session:
+            return redirect('/login/')
+        
+        requerimientos = Requerimiento.objects.select_related('cliente').all()
+        form = RequerimientoForm()
+        return render(request, 'gestor/requerimiento_list.html', {
+            'requerimientos': requerimientos,
+            'form': form
+        })
+
+    def post(self, request):
+        if 'usuario_id' not in request.session:
+            return redirect('/login/')
+        
+        form = RequerimientoForm(request.POST)
+        if form.is_valid():
+            cliente = form.cleaned_data.get('cliente')
+            if not cliente:
+                messages.error(request, "El campo Cliente es obligatorio.")
+            else:
+                form.save()
+                messages.success(request, "Requerimiento creado con éxito.")
+                return redirect('ticket_reque')
+        
+        requerimientos = Requerimiento.objects.select_related('cliente').all()
+        return render(request, 'gestor/requerimiento_list.html', {
+            'requerimientos': requerimientos,
+            'form': form
+        })

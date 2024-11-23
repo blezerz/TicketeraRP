@@ -12,20 +12,20 @@
         }
 
         #menu-lateral {
-            width: 15%;
+            width: 16%;
             min-width: 200px;
             background-color: #00796b; /* Color oscuro del menú */
             color: white;
             padding: 20px 15px;
-            height: auto; /* Altura completa de la página */
             display: flex;
             flex-direction: column;
             justify-content: space-between;
         }
 
-        #menu-lateral h1 {
+        #menu-lateral p {
             font-size: 1.5rem;
             margin-bottom: 20px;
+            margin-top: 20px;
             color: #ffffff;
             text-align: center;
         }
@@ -41,6 +41,22 @@
             text-align: left;
             transition: background-color 0.3s ease;
         }
+
+        #menu-lateral a:hover {
+            background-color: #004d40; /* Color más oscuro al pasar el mouse */
+        }
+
+        #menu-lateral .menu-footer {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #b2dfdb;
+        }
+
+        #menu-lateral .menu-footer a {
+            color: #80cbc4;
+            text-decoration: none;
+        }
+
 
         #menu-lateral a:hover {
             background-color: #004d40; /* Color más oscuro al pasar el mouse */
@@ -118,15 +134,15 @@
         <!-- Menú lateral -->
         <div id="menu-lateral">
             <div>
-                <h1 id="tit-menu">Ticketera</h1>
+                <p id="tit-menu">Ticketera</p>
                 <a href="{% url 'ticket_create' %}">Crear Nuevo Ticket</a>
                 <a href="{% url 'ticket_list' %}">Ver Tickets</a>
-                <a href="#">Reportes</a>
+                <a href="{% url 'ticket_reque' %}">Requerimiento</a>
                 <a href="#">Configuración</a>
             </div>
             <div class="menu-footer">
-                <p>&copy; 2024 Ticketera</p>
-                <a href="#">Soporte</a>
+                <span>&copy; 2024 Ticketera</span>
+                <a href="{% url 'logout' %}">Cerrar sesión</a>
             </div>
         </div>
 

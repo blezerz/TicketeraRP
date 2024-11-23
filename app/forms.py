@@ -194,3 +194,33 @@ class TicketEditForm(forms.ModelForm):
         if commit:
             ticket.save()
         return ticket
+    
+
+class RequerimientoForm(forms.ModelForm):
+    class Meta:
+        model = Requerimiento
+        fields = ['cliente', 'reque_c_detalle', 'reque_c_observacion']
+        widgets = {
+            'cliente': forms.Select(attrs={'class': 'form-control'}),
+            'reque_c_detalle': forms.TextInput(attrs={
+                'class': 'form-control',
+                'required': 'required',
+                'maxlength': 100,
+                'placeholder': 'Ingrese el detalle del requerimiento',
+            }),
+            'reque_c_observacion': forms.TextInput(attrs={
+                'class': 'form-control',
+                'maxlength': 100,
+                'placeholder': 'Ingrese una observación',
+            }),
+        }
+        labels = {
+            'cliente': 'Cliente',
+            'reque_c_detalle': 'Detalle del Requerimiento',
+            'reque_c_observacion': 'Observación ',
+        }
+    def clean_cliente(self):
+        cliente = self.cleaned_data.get('cliente')
+        if not cliente:
+            raise forms.ValidationError("El campo Cliente es obligatorio.")
+        return cliente

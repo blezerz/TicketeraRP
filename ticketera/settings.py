@@ -72,7 +72,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'bd_ticket',
         'USER': 'root',
-        'PASSWORD':'secret' 
+        'PASSWORD':'123123' 
     }
 }
 

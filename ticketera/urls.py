@@ -10,6 +10,7 @@ urlpatterns = [
     path('tickets/', views.TicketListView.as_view(), name='ticket_list'),
     path('tickets/<int:pk>/', views.TicketDetailView.as_view(), name='ticket_detail'),
     path('tickets/<int:pk>/edit/', views.TicketUpdateView.as_view(), name='ticket_edit'),
+    path('requerimientos/', views.RequerimientoListView.as_view(), name='ticket_reque'),
     path('login/', views.login),
     path('logout/', views.logout, name='logout')
 
