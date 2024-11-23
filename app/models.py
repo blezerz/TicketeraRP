@@ -17,7 +17,7 @@ class Departamento(models.Model):
 
 # Modelo para tb_descripcion
 class Descripcion(models.Model):
-    desc_c_nombre = models.TextField()
+    desc_c_nombre = models.CharField(max_length=100)
 
     def __str__(self):
         return self.desc_c_nombre
@@ -70,8 +70,8 @@ class TipoTicket(models.Model):
 
 # Modelo para tb_requerimiento
 class Requerimiento(models.Model):
-    reque_c_detalle = models.CharField(max_length=50)
-    reque_c_observacion = models.CharField(max_length=50)
+    reque_c_detalle = models.CharField(max_length=100)
+    reque_c_observacion = models.CharField(max_length=100)
     cliente = models.ForeignKey(Cliente, on_delete=models.SET_NULL, null=True, blank=True)
     tiempo = models.ForeignKey(Tiempo, on_delete=models.SET_NULL, null=True, blank=True)
 
