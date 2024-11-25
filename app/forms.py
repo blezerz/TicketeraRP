@@ -2,7 +2,7 @@ from django import forms
 from .models import Ticket, Descripcion, Tiempo, Requerimiento,Usuario
 
 class LoginForm(forms.Form):
-    username = forms.CharField(label="Nombre de usuario", max_length=100, required=True)
+    username = forms.CharField(label="Usuario", max_length=100, required=True)
     password = forms.CharField(label="Contraseña", widget=forms.PasswordInput, required=True)
 
 class TicketForm(forms.ModelForm):
@@ -19,39 +19,75 @@ class TicketForm(forms.ModelForm):
             'cliente'
         ]
         widgets = {
-            'usuario': forms.Select(attrs={'class': 'form-control'}),  # Dropdown para usuarios existentes
-            'estado': forms.Select(attrs={'class': 'form-control'}),   # Dropdown para estados
-            'prioridad': forms.Select(attrs={'class': 'form-control'}),  # Dropdown para prioridades
-            'tipo_ticket': forms.Select(attrs={'class': 'form-control'}),  # Dropdown para tipos de tickets
-            'cliente': forms.Select(attrs={'class': 'form-control'}),  # Dropdown para clientes
+            'usuario': forms.Select(attrs={'class': 'form-control'}),
+            'estado': forms.Select(attrs={'class': 'form-control'}),
+            'prioridad': forms.Select(attrs={'class': 'form-control'}),
+            'tipo_ticket': forms.Select(attrs={'class': 'form-control'}),
+            'cliente': forms.Select(attrs={'class': 'form-control'}),
+            'requerimiento': forms.Select(attrs={'class': 'form-control'}),  # Dropdown para requerimientos
         }
 
-    # Campos personalizados para crear registros nuevos (I)
     descripcion_nombre = forms.CharField(
         label="Descripción",
-        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3})
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        required=True  # Campo obligatorio
     )
     tiempo_hora_inicio = forms.DateTimeField(
-        label="Hora de Inicio",
-        widget=forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'})
+        label="Fecha de Inicio",
+        widget=forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
+        required=True  # Campo obligatorio
     )
     tiempo_hora_fin = forms.DateTimeField(
-        label="Hora de Fin",
-        widget=forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'})
+        label="Fecha de Fin",
+        widget=forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
+        required=True  # Campo obligatorio
     )
     tiempo_duracion = forms.IntegerField(
-        label="Duración (minutos)",
-        widget=forms.NumberInput(attrs={'class': 'form-control'})
+        label="Duración (hrs)",
+        widget=forms.NumberInput(attrs={'class': 'form-control'}),
+        required=True  # Campo obligatorio
     )
-    requerimiento_detalle = forms.CharField(
-        label="Detalle del Requerimiento",
-        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 2})
-    )
-    requerimiento_observacion = forms.CharField(
-        label="Observación del Requerimiento",
-        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 2})
-    )
+    
+    # Personaliza el campo de requerimiento para seleccionar un registro existente
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Configurar el queryset y las opciones del campo "requerimiento"
+        self.fields['requerimiento'].queryset = Requerimiento.objects.all()
+        self.fields['requerimiento'].label = "Seleccionar Requerimiento"
+        self.fields['requerimiento'].widget = forms.Select(attrs={'class': 'form-control'})
+        
+        # Formatear las opciones como `id.- descripción` y añadir una opción vacía al inicio
+        self.fields['requerimiento'].choices = [
+            ('', 'Selecciona un requerimiento')  # Opción vacía al inicio
+        ] + [
+            (req.id, f"{req.id}.- {req.reque_c_detalle}")
+            for req in Requerimiento.objects.all()
+        ]
+        
+        # Hacer que el campo sea obligatorio
+        self.fields['requerimiento'].required = True
 
+        # Aseguramos que los campos del modelo también sean obligatorios
+        self.fields['usuario'].required = True
+        self.fields['estado'].required = True
+        self.fields['prioridad'].required = True
+        self.fields['tipo_ticket'].required = True
+
+
+    def clean(self):
+        cleaned_data = super().clean()
+        # Validar que los campos personalizados no estén vacíos
+        if not cleaned_data.get('descripcion_nombre'):
+            self.add_error('descripcion_nombre', "Este campo es obligatorio.")
+        if not cleaned_data.get('tiempo_hora_inicio'):
+            self.add_error('tiempo_hora_inicio', "Este campo es obligatorio.")
+        if not cleaned_data.get('tiempo_hora_fin'):
+            self.add_error('tiempo_hora_fin', "Este campo es obligatorio.")
+        if not cleaned_data.get('tiempo_duracion'):
+            self.add_error('tiempo_duracion', "Este campo es obligatorio.")
+        return cleaned_data
+    
     # Sobrescribimos el método save() para insertar datos en las tablas relacionadas
     def save(self, commit=True):
         # Primero guardamos los datos en las tablas relacionadas
@@ -61,19 +97,17 @@ class TicketForm(forms.ModelForm):
             tmpo_d_hora_fin=self.cleaned_data['tiempo_hora_fin'],
             tmpo_n_duracion=self.cleaned_data['tiempo_duracion']
         )
-        requerimiento = Requerimiento.objects.create(
-            reque_c_detalle=self.cleaned_data['requerimiento_detalle'],
-            reque_c_observacion=self.cleaned_data['requerimiento_observacion'],
-            cliente=self.cleaned_data['cliente']
-        )
+
+        # Asignar el requerimiento seleccionado (en lugar de crear uno nuevo)
+        self.instance.requerimiento = self.cleaned_data['requerimiento']
 
         # Luego asignamos los IDs de las relaciones al ticket
         self.instance.descripcion = descripcion
         self.instance.tiempo = tiempo
-        self.instance.requerimiento = requerimiento
 
         # Finalmente, guardamos el ticket en la base de datos
         return super().save(commit=commit)
+
 
 
 class TicketEditForm(forms.ModelForm):
@@ -219,6 +253,35 @@ class RequerimientoForm(forms.ModelForm):
             'reque_c_detalle': 'Detalle del Requerimiento',
             'reque_c_observacion': 'Observación ',
         }
+    def clean_cliente(self):
+        cliente = self.cleaned_data.get('cliente')
+        if not cliente:
+            raise forms.ValidationError("El campo Cliente es obligatorio.")
+        return cliente
+    
+class RequerimientoEditForm(forms.ModelForm):
+    class Meta:
+        model = Requerimiento
+        fields = ['cliente', 'reque_c_detalle', 'reque_c_observacion']
+        widgets = {
+            'cliente': forms.Select(attrs={'class': 'form-control'}),
+            'reque_c_detalle': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'Ingrese el detalle del requerimiento',
+            }),
+            'reque_c_observacion': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'Ingrese una observación',
+            }),
+        }
+        labels = {
+            'cliente': 'Cliente',
+            'reque_c_detalle': 'Detalle del Requerimiento',
+            'reque_c_observacion': 'Observación',
+        }
+
     def clean_cliente(self):
         cliente = self.cleaned_data.get('cliente')
         if not cliente:
