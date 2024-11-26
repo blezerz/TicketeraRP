@@ -135,26 +135,21 @@ class TicketEditForm(forms.ModelForm):
         required=False
     )
 
-    # Campos para editar el requerimiento
-    requerimiento_detalle = forms.CharField(
-        label="Detalle del Requerimiento",
-        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
-        required=False
-    )
-    requerimiento_observacion = forms.CharField(
-        label="Observación del Requerimiento",
-        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
-        required=False
+    # Campo para seleccionar un requerimiento existente
+    requerimiento = forms.ChoiceField(
+        label="Seleccionar Requerimiento",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=True  # Campo obligatorio
     )
 
     class Meta:
         model = Ticket
         fields = [
-            'usuario', 
-            'estado', 
-            'prioridad', 
-            'tipo_ticket', 
-            'cliente', 
+            'usuario',
+            'estado',
+            'prioridad',
+            'tipo_ticket',
+            'cliente',
         ]
         widgets = {
             'usuario': forms.Select(attrs={'class': 'form-control'}),
@@ -175,16 +170,29 @@ class TicketEditForm(forms.ModelForm):
                 self.fields['tiempo_inicio'].initial = self.instance.tiempo.tmpo_d_hora_inicio
                 self.fields['tiempo_fin'].initial = self.instance.tiempo.tmpo_d_hora_fin
                 self.fields['tiempo_duracion'].initial = self.instance.tiempo.tmpo_n_duracion
-            # Inicializar requerimiento
-            if self.instance.requerimiento:
-                self.fields['requerimiento_detalle'].initial = self.instance.requerimiento.reque_c_detalle
-                self.fields['requerimiento_observacion'].initial = self.instance.requerimiento.reque_c_observacion
+
+        # Configurar el dropdown para requerimientos
+        self.fields['requerimiento'].choices = [
+            ('', 'Selecciona un requerimiento')  # Opción vacía al inicio
+        ] + [
+            (req.id, f"{req.id}.- {req.reque_c_detalle}")
+            for req in Requerimiento.objects.all()
+        ]
+
+        # Preseleccionar el requerimiento actual del ticket, si existe
+        if self.instance.requerimiento:
+            self.fields['requerimiento'].initial = self.instance.requerimiento.id
 
     def save(self, commit=True):
         # Guardar primero el objeto Ticket
         ticket = super().save(commit=False)
 
-        # Editar o crear la descripción
+        # Editar o asignar el requerimiento seleccionado
+        requerimiento_id = self.cleaned_data.get('requerimiento')
+        if requerimiento_id:
+            ticket.requerimiento = Requerimiento.objects.get(id=requerimiento_id)
+
+        # Guardar otros campos relacionados
         descripcion_texto = self.cleaned_data.get('descripcion_texto', '').strip()
         if ticket.descripcion:
             ticket.descripcion.desc_c_nombre = descripcion_texto
@@ -193,7 +201,6 @@ class TicketEditForm(forms.ModelForm):
             descripcion = Descripcion.objects.create(desc_c_nombre=descripcion_texto)
             ticket.descripcion = descripcion
 
-        # Editar o crear el tiempo
         tiempo_inicio = self.cleaned_data.get('tiempo_inicio')
         tiempo_fin = self.cleaned_data.get('tiempo_fin')
         tiempo_duracion = self.cleaned_data.get('tiempo_duracion')
@@ -209,21 +216,6 @@ class TicketEditForm(forms.ModelForm):
                 tmpo_n_duracion=tiempo_duracion
             )
             ticket.tiempo = tiempo
-
-        # Editar o crear el requerimiento
-        requerimiento_detalle = self.cleaned_data.get('requerimiento_detalle', '').strip()
-        requerimiento_observacion = self.cleaned_data.get('requerimiento_observacion', '').strip()
-        if ticket.requerimiento:
-            ticket.requerimiento.reque_c_detalle = requerimiento_detalle
-            ticket.requerimiento.reque_c_observacion = requerimiento_observacion
-            ticket.requerimiento.save()
-        else:
-            requerimiento = Requerimiento.objects.create(
-                reque_c_detalle=requerimiento_detalle,
-                reque_c_observacion=requerimiento_observacion,
-                cliente=ticket.cliente
-            )
-            ticket.requerimiento = requerimiento
 
         if commit:
             ticket.save()
