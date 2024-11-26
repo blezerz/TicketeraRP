@@ -1,5 +1,5 @@
 from django import forms
-from .models import Ticket, Descripcion, Tiempo, Requerimiento,Usuario
+from .models import Ticket, Descripcion, Tiempo, Requerimiento,Usuario, Estado, Prioridad, Cliente
 
 class LoginForm(forms.Form):
     username = forms.CharField(label="Usuario", max_length=100, required=True)
@@ -287,3 +287,37 @@ class RequerimientoEditForm(forms.ModelForm):
         if not cliente:
             raise forms.ValidationError("El campo Cliente es obligatorio.")
         return cliente
+
+# Filtros para Lista de Ticket y Requerimiento
+class TicketFilterForm(forms.Form):
+    estado = forms.ModelChoiceField(
+        queryset=Estado.objects.all(),
+        label="Estado",
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    cliente = forms.ModelChoiceField(
+        queryset=Cliente.objects.all(),
+        label="Cliente",
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    prioridad = forms.ModelChoiceField(
+        queryset=Prioridad.objects.all(),
+        label="Prioridad",
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+class RequerimientoFilterForm(forms.Form):
+    cliente = forms.ModelChoiceField(
+        queryset=Cliente.objects.all(),
+        label="Cliente",
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    detalle = forms.CharField(
+        label="Detalle",
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )

@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib import messages
-from .forms import TicketForm, TicketEditForm, LoginForm, RequerimientoForm, RequerimientoEditForm
+from .forms import TicketForm, TicketEditForm, LoginForm, RequerimientoForm, RequerimientoEditForm, TicketFilterForm, RequerimientoFilterForm
 from .models import Ticket, Usuario, Requerimiento
 from django.views.generic import DetailView, UpdateView, ListView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
 
 def login(request):
     if request.method == 'POST':
@@ -84,14 +85,32 @@ class TicketCreateView(View):
 #             return redirect('ticket_list')  # Cambia 'ticket_list' según el nombre de tu vista de listado
 #         return render(request, 'gestor/ticket_reque.html', {'form': form})
 
-class TicketListView(View):
-    
+class TicketListView(View): 
     def get(self, request):
         if 'usuario_id' not in request.session:
             return redirect('/login/')
-        # Obtenemos todos los tickets de la base de datos
+        
+        # Crear el formulario de filtros
+        form = TicketFilterForm(request.GET or None)
         tickets = Ticket.objects.all()
-        return render(request, 'gestor/ticket_list.html', {'tickets': tickets})
+
+        # Aplicar filtros si se seleccionan
+        if form.is_valid():
+            estado = form.cleaned_data.get('estado')
+            cliente = form.cleaned_data.get('cliente')
+            prioridad = form.cleaned_data.get('prioridad')
+
+            if estado:
+                tickets = tickets.filter(estado=estado)
+            if cliente:
+                tickets = tickets.filter(cliente=cliente)
+            if prioridad:
+                tickets = tickets.filter(prioridad=prioridad)
+
+        return render(request, 'gestor/ticket_list.html', {
+            'tickets': tickets,
+            'form': form,
+        })
     
 class TicketDetailView(DetailView):
     model = Ticket
@@ -114,32 +133,54 @@ class RequerimientoListView(View):
         if 'usuario_id' not in request.session:
             return redirect('/login/')
         
+        # Formularios
+        filtro_form = RequerimientoFilterForm(request.GET or None)
+        creacion_form = RequerimientoForm()
+
+        # Requerimientos base
         requerimientos = Requerimiento.objects.select_related('cliente').all()
-        form = RequerimientoForm()
+
+        # Aplicar filtros si se seleccionan
+        if filtro_form.is_valid():
+            cliente = filtro_form.cleaned_data.get('cliente')
+            detalle = filtro_form.cleaned_data.get('detalle')
+
+            if cliente:
+                requerimientos = requerimientos.filter(cliente=cliente)
+            if detalle:
+                requerimientos = requerimientos.filter(reque_c_detalle__icontains=detalle)
+
         return render(request, 'gestor/requerimiento_list.html', {
             'requerimientos': requerimientos,
-            'form': form
+            'filtro_form': filtro_form,
+            'creacion_form': creacion_form,
         })
 
     def post(self, request):
         if 'usuario_id' not in request.session:
             return redirect('/login/')
-        
-        form = RequerimientoForm(request.POST)
-        if form.is_valid():
-            cliente = form.cleaned_data.get('cliente')
+
+        creacion_form = RequerimientoForm(request.POST)
+        filtro_form = RequerimientoFilterForm(request.GET or None)
+
+        if creacion_form.is_valid():
+            cliente = creacion_form.cleaned_data.get('cliente')
             if not cliente:
                 messages.error(request, "El campo Cliente es obligatorio.")
             else:
-                form.save()
+                creacion_form.save()
                 messages.success(request, "Requerimiento creado con éxito.")
                 return redirect('ticket_reque')
-        
+
+        # Si hay un error, volvemos a cargar los requerimientos y los formularios
         requerimientos = Requerimiento.objects.select_related('cliente').all()
         return render(request, 'gestor/requerimiento_list.html', {
             'requerimientos': requerimientos,
-            'form': form
+            'filtro_form': filtro_form,
+            'creacion_form': creacion_form,
         })
+
+
 
 class RequerimientoUpdateView(UpdateView):
         

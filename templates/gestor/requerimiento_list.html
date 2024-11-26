@@ -223,47 +223,63 @@
 
         <!-- Contenido principal -->
          <div id="contenido">
+            <!-- Formulario de Creación -->
             <div class="main-create">
                 <h1>Crear Requerimiento</h1>
                 <form method="post">
                     {% csrf_token %}
                     <div class="f">
-                        
                         <div>
                             <label>
-                                {{ form.cliente.label_tag }}
+                                {{ creacion_form.cliente.label_tag }}
                                 <span style="color:red">*</span>
                             </label>
-                            {{ form.cliente }}
-                            <small class="text-danger">{{ form.cliente.errors }}</small> <!-- Errores para cliente -->
-
+                            {{ creacion_form.cliente }}
+                            <small class="text-danger">{{ creacion_form.cliente.errors }}</small>
                         </div> 
                         <div>
-                            <label for="{{ form.reque_c_detalle.id_for_label }}">
-                                {{ form.reque_c_detalle.label }}
+                            <label for="{{ creacion_form.reque_c_detalle.id_for_label }}">
+                                {{ creacion_form.reque_c_detalle.label }}
                                 <span class="note">(máximo 100 caracteres)</span>
                                 <span style="color:red">*</span>
                             </label>
-                            {{ form.reque_c_detalle }}
+                            {{ creacion_form.reque_c_detalle }}
                         </div> 
                         <div>
-                            <label for="{{ form.reque_c_observacion.id_for_label }}">
-                                {{ form.reque_c_observacion.label }}
+                            <label for="{{ creacion_form.reque_c_observacion.id_for_label }}">
+                                {{ creacion_form.reque_c_observacion.label }}
                                 <span class="note">(máximo 100 caracteres)</span>
                                 <span style="color:red">*</span>
                             </label>
-                            {{ form.reque_c_observacion }}
+                            {{ creacion_form.reque_c_observacion }}
                         </div>
                     </div>
             
                     <!-- Botón -->
-                    <div style="text-align: right;">
+                    <div style="text-align: right; margin-top: 15px">
                         <button type="submit" class="btn btn-primary">Guardar</button>
                     </div>
                 </form>
             </div>
+
+            <!-- Formulario de Filtros -->
             <div class="main-content">
                 <h1>Lista de Requerimientos</h1>
+                <form method="get" action="" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <div>
+                        <label for="{{ filtro_form.cliente.id_for_label }}">{{ filtro_form.cliente.label }}</label>
+                        {{ filtro_form.cliente }}
+                    </div>
+                    <div>
+                        <label for="{{ filtro_form.detalle.id_for_label }}">{{ filtro_form.detalle.label }}</label>
+                        {{ filtro_form.detalle }}
+                    </div>
+                    <div style="margin-top: 23px;">
+                        <button type="submit" class="btn btn-secondary">Filtrar</button>
+                    </div>
+                </form>
+
+                <!-- Tabla de Lista de Requerimientos -->
                 <table class="ticket-table">
                     <thead>
                         <tr>

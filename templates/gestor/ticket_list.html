@@ -78,6 +78,34 @@
             margin-bottom: 20px;
         }
 
+        .filter-container {
+        display: flex;
+        justify-content: center; /* Centra horizontalmente el formulario */
+        margin-bottom: 20px;
+        }
+
+        .filter-form {
+            display: flex;
+            align-items: center; /* Alinea verticalmente los elementos dentro del formulario */
+            gap: 15px; /* Espaciado entre los elementos */
+        }
+
+        .filter-form div {
+            display: flex;
+            flex-direction: column; /* Coloca las etiquetas y campos en columna */
+            align-items: center; /* Centra horizontalmente los elementos */
+        }
+
+        .filter-form label {
+            margin-bottom: 5px;
+        }
+
+        .filter-form button {
+            margin-top: 27px;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
         .ticket-table {
             margin: 0 auto;
             background-color: #ffffff;
@@ -193,6 +221,25 @@
         <!-- Contenido principal -->
         <div class="main-content">
             <h1>Lista de Tickets</h1>
+            <div class="filter-container">
+                <form method="get" action="" class="filter-form">
+                    <div>
+                        <label for="{{ form.cliente.id_for_label }}">{{ form.cliente.label }}</label>
+                        {{ form.cliente }}
+                    </div>
+                    <div>
+                        <label for="{{ form.estado.id_for_label }}">{{ form.estado.label }}</label>
+                        {{ form.estado }}
+                    </div>
+                    <div>
+                        <label for="{{ form.prioridad.id_for_label }}">{{ form.prioridad.label }}</label>
+                        {{ form.prioridad }}
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-primary">Filtrar</button>
+                    </div>
+                </form>
+            </div>
             <table class="ticket-table">
                 <thead>
                     <tr>
