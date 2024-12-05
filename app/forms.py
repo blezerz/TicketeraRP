@@ -1,11 +1,22 @@
 from django import forms
+from django.forms import modelformset_factory
 from .models import Ticket, Descripcion, Tiempo, Requerimiento,Usuario, Estado, Prioridad, Cliente
 
 class LoginForm(forms.Form):
-    username = forms.CharField(label="Usuario", max_length=100, required=True)
-    password = forms.CharField(label="Contraseña", widget=forms.PasswordInput, required=True)
+    username = forms.CharField(label="Usuario", max_length=100, required=True, widget=forms.TextInput(
+            attrs={
+                'class': 'form-control',
+                'oninput': "validarCaracteresProhibidos(this)",  # Llama a la función JavaScript
+            }))
+    password = forms.CharField(label="Contraseña",  required=True, widget=forms.PasswordInput(
+            attrs={
+                'class': 'form-control',
+                'oninput': "validarCaracteresProhibidos(this)",  # Llama a la función JavaScript
+            }))
 
+# forms.py
 class TicketForm(forms.ModelForm):
+ 
     class Meta:
         model = Ticket
         fields = [
@@ -16,7 +27,8 @@ class TicketForm(forms.ModelForm):
             'tiempo', 
             'requerimiento', 
             'tipo_ticket', 
-            'cliente'
+            'cliente',
+            'archivo_adjunto'
         ]
         widgets = {
             'usuario': forms.Select(attrs={'class': 'form-control'}),
@@ -24,13 +36,27 @@ class TicketForm(forms.ModelForm):
             'prioridad': forms.Select(attrs={'class': 'form-control'}),
             'tipo_ticket': forms.Select(attrs={'class': 'form-control'}),
             'cliente': forms.Select(attrs={'class': 'form-control'}),
-            'requerimiento': forms.Select(attrs={'class': 'form-control'}),  # Dropdown para requerimientos
+            'requerimiento': forms.Select(attrs={'class': 'form-control'}),
         }
+
+    #Campo para adjuntar archivos
+    archivo_adjunto = forms.FileField(
+        label="Archivo Adjunto",
+        widget=forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        required=False  
+    )
 
     descripcion_nombre = forms.CharField(
         label="Descripción",
-        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-        required=True  # Campo obligatorio
+        widget=forms.Textarea(
+            attrs={
+                'class': 'form-control',
+                'maxlength': 100,
+                'rows': 3,
+                'oninput': "validarCaracteresProhibidos(this)",  # Llama a la función JavaScript
+            }
+        ),
+        required=True
     )
     tiempo_hora_inicio = forms.DateTimeField(
         label="Fecha de Inicio",
@@ -44,11 +70,16 @@ class TicketForm(forms.ModelForm):
     )
     tiempo_duracion = forms.IntegerField(
         label="Duración (hrs)",
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'min': '0',             # No permitir valores negativos
+            'max': '999',           # No permitir más de 999
+            'maxlength': '3',       # Limitar a 3 dígitos (aunque este no es un atributo estándar de input type="number", puede ser útil para navegadores que lo acepten)
+            'oninput': 'this.value = Math.max(0, Math.min(999, this.value));'  # Asegura que los valores sean entre 0 y 999 mientras escriben
+        }),
         required=True  # Campo obligatorio
     )
     
-    # Personaliza el campo de requerimiento para seleccionar un registro existente
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
@@ -74,21 +105,19 @@ class TicketForm(forms.ModelForm):
         self.fields['prioridad'].required = True
         self.fields['tipo_ticket'].required = True
 
-
+    # Validación general para asegurarte de que todo cumple las reglas
     def clean(self):
         cleaned_data = super().clean()
-        # Validar que los campos personalizados no estén vacíos
-        if not cleaned_data.get('descripcion_nombre'):
-            self.add_error('descripcion_nombre', "Este campo es obligatorio.")
-        if not cleaned_data.get('tiempo_hora_inicio'):
-            self.add_error('tiempo_hora_inicio', "Este campo es obligatorio.")
-        if not cleaned_data.get('tiempo_hora_fin'):
-            self.add_error('tiempo_hora_fin', "Este campo es obligatorio.")
-        if not cleaned_data.get('tiempo_duracion'):
-            self.add_error('tiempo_duracion', "Este campo es obligatorio.")
+        
+        # Validaciones personalizadas adicionales si es necesario
+        tiempo_inicio = cleaned_data.get('tiempo_hora_inicio')
+        tiempo_fin = cleaned_data.get('tiempo_hora_fin')
+        
+        if tiempo_inicio and tiempo_fin and tiempo_inicio > tiempo_fin:
+            self.add_error('tiempo_hora_fin', "La hora de fin no puede ser anterior a la hora de inicio.")
+        
         return cleaned_data
-    
-    # Sobrescribimos el método save() para insertar datos en las tablas relacionadas
+
     def save(self, commit=True):
         # Primero guardamos los datos en las tablas relacionadas
         descripcion = Descripcion.objects.create(desc_c_nombre=self.cleaned_data['descripcion_nombre'])
@@ -105,6 +134,11 @@ class TicketForm(forms.ModelForm):
         self.instance.descripcion = descripcion
         self.instance.tiempo = tiempo
 
+        # Asignar el archivo adjunto al ticket (si se proporciona)
+        archivo_adjunto = self.cleaned_data.get('archivo_adjunto')
+        if archivo_adjunto:
+            self.instance.archivo_adjunto = archivo_adjunto
+
         # Finalmente, guardamos el ticket en la base de datos
         return super().save(commit=commit)
 
@@ -114,7 +148,13 @@ class TicketEditForm(forms.ModelForm):
     # Campo para editar la descripción
     descripcion_texto = forms.CharField(
         label="Descripción",
-        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        widget=forms.Textarea(
+                              attrs={
+                'class': 'form-control',
+                'maxlength': 100,
+                'rows': 3,
+                'oninput': "validarCaracteresProhibidos(this)",  # Llama a la función JavaScript
+            }),
         required=False
     )
 
@@ -131,7 +171,13 @@ class TicketEditForm(forms.ModelForm):
     )
     tiempo_duracion = forms.IntegerField(
         label="Duración (minutos)",
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'min': '0',             # No permitir valores negativos
+            'max': '999',           # No permitir más de 999
+            'maxlength': '3',       # Limitar a 3 dígitos (aunque este no es un atributo estándar de input type="number", puede ser útil para navegadores que lo acepten)
+            'oninput': 'this.value = Math.max(0, Math.min(999, this.value));'  # Asegura que los valores sean entre 0 y 999 mientras escriben
+        }),
         required=False
     )
 
@@ -140,6 +186,12 @@ class TicketEditForm(forms.ModelForm):
         label="Seleccionar Requerimiento",
         widget=forms.Select(attrs={'class': 'form-control'}),
         required=True  # Campo obligatorio
+    )
+    
+    archivo_adjunto = forms.FileField(
+        label="Archivo Adjunto (opcional)",
+        required=False,  # Este campo es opcional
+        widget=forms.ClearableFileInput(attrs={'class': 'form-control', 'multiple': False})
     )
 
     class Meta:
@@ -150,6 +202,8 @@ class TicketEditForm(forms.ModelForm):
             'prioridad',
             'tipo_ticket',
             'cliente',
+            'archivo_adjunto',  # Agregar el campo de archivo
+
         ]
         widgets = {
             'usuario': forms.Select(attrs={'class': 'form-control'}),
@@ -232,11 +286,13 @@ class RequerimientoForm(forms.ModelForm):
                 'class': 'form-control',
                 'required': 'required',
                 'maxlength': 100,
+                'oninput': "validarCaracteresProhibidos(this)",  # Llama a la función JavaScript
                 'placeholder': 'Ingrese el detalle del requerimiento',
             }),
             'reque_c_observacion': forms.TextInput(attrs={
                 'class': 'form-control',
                 'maxlength': 100,
+                'oninput': "validarCaracteresProhibidos(this)",  # Llama a la función JavaScript
                 'placeholder': 'Ingrese una observación',
             }),
         }
@@ -259,12 +315,16 @@ class RequerimientoEditForm(forms.ModelForm):
             'cliente': forms.Select(attrs={'class': 'form-control'}),
             'reque_c_detalle': forms.Textarea(attrs={
                 'class': 'form-control',
+                'maxlength': 100,
                 'rows': 2,
+                'oninput': "validarCaracteresProhibidos(this)",  # Llama a la función JavaScript
                 'placeholder': 'Ingrese el detalle del requerimiento',
             }),
             'reque_c_observacion': forms.Textarea(attrs={
                 'class': 'form-control',
+                'maxlength': 100,
                 'rows': 2,
+                'oninput': "validarCaracteresProhibidos(this)",  # Llama a la función JavaScript
                 'placeholder': 'Ingrese una observación',
             }),
         }

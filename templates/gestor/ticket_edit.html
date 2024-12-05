@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load filters %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -123,6 +124,16 @@
         }
     </style>
 </head>
+<script>
+    function validarCaracteresProhibidos(campo) {
+        // Lista de caracteres no permitidos
+        const caracteresProhibidos = /['";\/\*\+\{\}\[\]\<\>\=\&\|\%\\]/g;    
+    
+        // Reemplazar cualquier carácter no permitido con una cadena vacía
+        campo.value = campo.value.replace(caracteresProhibidos, '');
+    }
+    
+</script>
 <body>
     <div style="display: flex;">
         <!-- Menú lateral -->
@@ -142,7 +153,7 @@
         <!-- Contenido principal -->
         <div class="main-content">
             <h1 class="mb-4">Editar Ticket</h1>
-            <form method="post" class="row g-3">
+            <form method="post" class="row g-3" enctype="multipart/form-data">
                 {% csrf_token %}
 
                 <!-- Sección de Campos Relacionados -->
@@ -163,10 +174,6 @@
                     <div class="col-md-6">
                         <label for="tipo_ticket" class="form-label">Tipo de Ticket</label>
                         {{ form.tipo_ticket }}
-                    </div>
-                    <div class="col-md-6">
-                        <label for="cliente" class="form-label">Cliente</label>
-                        {{ form.cliente }}
                     </div>
                 </div>
 
@@ -202,6 +209,29 @@
                     <div class="col-12">
                         <label for="id_requerimiento" class="form-label">Requerimiento</label>
                         {{ form.requerimiento }}
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Archivos Adjuntos</h3>
+                    <p> &nbsp; &nbsp; Lista de Archivos Adjuntos (selecciona para eliminar)</p>
+                    {% if archivos_adjunto %}
+                        <ul>
+                            {% for archivo in archivos_adjunto %}
+                                <li>
+                                    <strong>{{ archivo.name|basename }}</strong> &nbsp;
+                                    <a href="{{ archivo.url }}" target="_blank"></a>
+                                    <input type="checkbox" name="eliminar_archivo" value="{{ archivo.name }}">
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No hay archivos adjuntos actualmente.</p>
+                    {% endif %}
+                
+                    <div class="col-12">
+                        <label for="id_archivo_adjunto" class="form-label">Subir nuevo archivo adjunto</label>
+                        <input type="file" name="archivo_adjunto" id="id_archivo_adjunto" class="form-control">
                     </div>
                 </div>
 

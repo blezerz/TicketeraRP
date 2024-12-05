@@ -1,6 +1,9 @@
 from django.contrib import admin
 from django.urls import path, include
 from app import views
+from django.conf import settings
+from django.conf.urls.static import static
+
 
 
 urlpatterns = [
@@ -16,3 +19,7 @@ urlpatterns = [
     path('logout/', views.logout, name='logout')
 
 ]
+
+if settings.DEBUG:  # Solo en desarrollo
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

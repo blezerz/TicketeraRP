@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load filters %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -118,8 +119,15 @@
                 <p><strong>Prioridad:</strong> {{ ticket.prioridad }}</p>
                 <p><strong>Tipo de Ticket:</strong> {{ ticket.tipo_ticket }}</p>
                 <p><strong>Descripción:</strong> {{ ticket.descripcion }}</p>
-                <p><strong>Tiempo:</strong> {{ ticket.tiempo }}</p>
+                <p><strong>Tiempo:</strong> {{ ticket.tiempo_inicio_formateado }} - {{ ticket.tiempo_fin_formateado }}</p>
                 <p><strong>Requerimiento:</strong> {{ ticket.requerimiento }}</p>
+                <p><strong>Archivo Adjunto:</strong>
+                    {% if ticket.archivo_adjunto %}
+                        <a href="{{ ticket.archivo_adjunto.url }}" download>{{ ticket.archivo_adjunto.name|basename }}</a>
+                    {% else %}
+                        No hay archivo adjunto.
+                    {% endif %}
+                </p>
             </div>
             <a href="{% url 'ticket_list' %}" class="btn btn-outline-secondary mt-4">Volver a la lista</a>
         </div>

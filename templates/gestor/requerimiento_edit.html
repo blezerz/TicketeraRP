@@ -159,6 +159,15 @@
 
     </style>
 </head>
+<script>
+    function validarCaracteresProhibidos(campo) {
+        // Lista de caracteres no permitidos
+        const caracteresProhibidos = /['";\/\*\+\{\}\[\]\<\>\=\&\|\%\\]/g;    
+    
+        // Reemplazar cualquier carácter no permitido con una cadena vacía
+        campo.value = campo.value.replace(caracteresProhibidos, '');
+    }
+</script>
 <body>
 
     <div id="main-pag" style="display: flex;">

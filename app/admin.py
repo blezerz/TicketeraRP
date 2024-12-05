@@ -36,7 +36,6 @@ class PrioridadAdmin(admin.ModelAdmin):
 admin.site.register(Prioridad,PrioridadAdmin)
 
 
-
 class TiempoAdmin(admin.ModelAdmin):
     list_display=["id","tmpo_d_hora_inicio","tmpo_d_hora_fin","tmpo_n_duracion"]
 admin.site.register(Tiempo,TiempoAdmin)

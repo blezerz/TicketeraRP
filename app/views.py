@@ -39,9 +39,6 @@ def login(request):
     return render(request, 'login.html', {'form': form})
 
 
-
-
-
 def logout(request):
     # Cierra la sesión del usuario
     request.session.flush()  # Elimina todos los datos de la sesión actual
@@ -62,28 +59,12 @@ class TicketCreateView(View):
     def post(self, request):
         if 'usuario_id' not in request.session:
             return redirect('/login/')
-        form = TicketForm(request.POST)
+        form = TicketForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()  # Guarda los datos del ticket con el requerimiento seleccionado
             return redirect('ticket_list')
         return render(request, 'gestor/ticket_form.html', {'form': form})
 
-# class TicketCreateReque(View):
-    
-#     def get(self, request):
-#         if 'usuario_id' not in request.session:
-#             return redirect('/login/')
-#         form = TicketForm()
-#         return render(request, 'gestor/ticket_reque.html', {'form': form})
-
-#     def post(self, request):
-#         if 'usuario_id' not in request.session:
-#             return redirect('/login/')
-#         form = TicketForm(request.POST)
-#         if form.is_valid():
-#             form.save()  # Se encarga de guardar los datos en todas las tablas relacionadas
-#             return redirect('ticket_list')  # Cambia 'ticket_list' según el nombre de tu vista de listado
-#         return render(request, 'gestor/ticket_reque.html', {'form': form})
 
 class TicketListView(View): 
     def get(self, request):
@@ -118,14 +99,48 @@ class TicketDetailView(DetailView):
     context_object_name = 'ticket'
 
     def get_object(self):
-        # Busca el ticket por su ID o lanza un 404 si no existe
-        return get_object_or_404(Ticket, id=self.kwargs['pk'])
+        ticket = get_object_or_404(Ticket, id=self.kwargs['pk'])
+        
+        # Acceder a las fechas formateadas a través del objeto 'tiempo'
+        if ticket.tiempo:
+            ticket.tiempo_inicio_formateado = ticket.tiempo.formato_fecha_inicio()
+            ticket.tiempo_fin_formateado = ticket.tiempo.formato_fecha_fin()
+        else:
+            ticket.tiempo_inicio_formateado = 'N/A'
+            ticket.tiempo_fin_formateado = 'N/A'
+
+        return ticket
     
 class TicketUpdateView(UpdateView):
     model = Ticket
     form_class = TicketEditForm
     template_name = 'gestor/ticket_edit.html'  
-    success_url = reverse_lazy('ticket_list')   # Redirige a la lista de tickets tras guardar
+    success_url = reverse_lazy('ticket_list')  # Redirige a la lista de tickets tras guardar
+
+    def form_valid(self, form):
+    # Aquí manejamos la eliminación de archivos seleccionados
+        if 'eliminar_archivo' in self.request.POST:
+            archivos_a_eliminar = self.request.POST.getlist('eliminar_archivo')
+            ticket = form.instance  # Obtenemos el ticket actual que estamos editando
+
+            # Si estás utilizando un solo archivo
+            if ticket.archivo_adjunto.name in archivos_a_eliminar:
+                ticket.archivo_adjunto.delete()  # Eliminar archivo del sistema de archivos
+                ticket.archivo_adjunto = None  # Limpiar campo en el modelo
+
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        ticket = self.object  # Obtenemos el ticket actual
+        # Añadimos el archivo actual al contexto si existe
+        if ticket.archivo_adjunto:
+            context['archivos_adjunto'] = [ticket.archivo_adjunto]
+        else:
+            context['archivos_adjunto'] = []
+
+        return context
+
 
 
 class RequerimientoListView(View):

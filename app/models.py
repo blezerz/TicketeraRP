@@ -59,6 +59,13 @@ class Tiempo(models.Model):
 
     def __str__(self):
         return f"{self.tmpo_d_hora_inicio} - {self.tmpo_d_hora_fin}"
+    
+     # Método para formatear las fechas
+    def formato_fecha_inicio(self):
+        return self.tmpo_d_hora_inicio.strftime('%d/%m/%Y') if self.tmpo_d_hora_inicio else 'N/A'
+
+    def formato_fecha_fin(self):
+        return self.tmpo_d_hora_fin.strftime('%d/%m/%Y') if self.tmpo_d_hora_fin else 'N/A'
 
 # Modelo para tb_tipo_ticket
 class TipoTicket(models.Model):
@@ -91,7 +98,8 @@ class Usuario(models.Model):
 
     def __str__(self):
         return self.usuar_c_nombre
-
+    
+    
 # Modelo para tb_ticket
 class Ticket(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True)
@@ -102,6 +110,8 @@ class Ticket(models.Model):
     requerimiento = models.ForeignKey(Requerimiento, on_delete=models.SET_NULL, null=True, blank=True)
     tipo_ticket = models.ForeignKey(TipoTicket, on_delete=models.SET_NULL, null=True, blank=True)
     cliente = models.ForeignKey(Cliente, on_delete=models.SET_NULL, null=True, blank=True)
+    archivo_adjunto = models.FileField(upload_to='archivos_adjuntos/', null=True, blank=True)
 
     def __str__(self):
         return f"Ticket {self.id}"
+    
