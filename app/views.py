@@ -7,7 +7,46 @@ from django.views.generic import DetailView, UpdateView, ListView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
+from django.core.mail import send_mail
+from django.conf import settings
+from django.http import HttpResponse
+from . import models
+from django.core.mail import send_mail
+from django.conf import settings
+from dirtyfields import DirtyFieldsMixin 
+from django.core.paginator import Paginator
 
+def enviar_correo_dinamico(asunto, mensaje, destinatario):
+    try:
+        send_mail(
+            subject=asunto,
+            message=mensaje,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[destinatario],
+            fail_silently=False,
+        )
+        return True
+    except Exception as e:
+        print(f"Error al enviar correo: {e}")
+        return False
+
+
+
+
+
+
+
+def enviar_correo(request):
+    subject = 'Asunto del correo'
+    message = 'Este es el contenido del correo.'
+    from_email = settings.EMAIL_HOST_USER
+    recipient_list = ['byronignaciocerda@gmail.com']  # Lista de destinatarios
+
+    try:
+        send_mail(subject, message, from_email, recipient_list)
+        return HttpResponse("Correo enviado exitosamente.")
+    except Exception as e:
+        return HttpResponse(f"Error al enviar el correo: {e}")
 def login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -49,7 +88,6 @@ def logout(request):
 
 
 class TicketCreateView(View):
-    
     def get(self, request):
         if 'usuario_id' not in request.session:
             return redirect('/login/')
@@ -59,10 +97,33 @@ class TicketCreateView(View):
     def post(self, request):
         if 'usuario_id' not in request.session:
             return redirect('/login/')
+        
         form = TicketForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()  # Guarda los datos del ticket con el requerimiento seleccionado
-            return redirect('ticket_list')
+            ticket = form.save()  # Se guarda el ticket en la base de datos
+
+            # Obtener el correo del usuario asignado al ticket
+            usuario_asignado = ticket.usuario
+            if usuario_asignado and usuario_asignado.email:  # Verifica que el usuario tenga un correo
+                asunto = f"Nuevo Ticket Asignado: {ticket.id}"
+                mensaje = f"""
+                Hola {usuario_asignado.usuar_c_nombre},
+
+                Se te ha asignado un nuevo ticket con los siguientes detalles:
+                - ID: {ticket.id}
+                - Estado: {ticket.estado.estado_c_nombre if ticket.estado else 'Sin estado'}
+                - Prioridad: {ticket.prioridad.prio_c_nombre if ticket.prioridad else 'No definida'}
+                - Cliente: {ticket.cliente.clien_c_nombre if ticket.cliente else 'Sin cliente asociado'}
+
+                Por favor, revisa el sistema para más detalles.
+
+                Gracias,
+                El equipo de soporte
+                """
+                enviar_correo_dinamico(asunto, mensaje, usuario_asignado.email)
+
+            return redirect('ticket_list')  # Cambia 'ticket_list' según el nombre de tu vista de listado
+
         return render(request, 'gestor/ticket_form.html', {'form': form})
 
 
@@ -74,6 +135,11 @@ class TicketListView(View):
         # Crear el formulario de filtros
         form = TicketFilterForm(request.GET or None)
         tickets = Ticket.objects.all()
+		
+		# Configuramos la paginación: 10 tickets por página
+        paginator = Paginator(tickets, 10)  
+        page_number = request.GET.get('page')  # Obtenemos el número de la página actual desde la URL
+        page_obj = paginator.get_page(page_number)  # Obtenemos los tickets de la página actual
 
         # Aplicar filtros si se seleccionan
         if form.is_valid():
@@ -87,10 +153,11 @@ class TicketListView(View):
                 tickets = tickets.filter(cliente=cliente)
             if prioridad:
                 tickets = tickets.filter(prioridad=prioridad)
-
+		
         return render(request, 'gestor/ticket_list.html', {
             'tickets': tickets,
             'form': form,
+            'page_obj': page_obj
         })
     
 class TicketDetailView(DetailView):

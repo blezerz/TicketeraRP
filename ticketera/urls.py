@@ -16,7 +16,8 @@ urlpatterns = [
     path('requerimientos/', views.RequerimientoListView.as_view(), name='ticket_reque'),
     path('requerimientos/<int:pk>/editar/', views.RequerimientoUpdateView.as_view(), name='requerimiento_edit'),
     path('login/', views.login),
-    path('logout/', views.logout, name='logout')
+    path('logout/', views.logout, name='logout'),
+    path('enviar-correo/', views.enviar_correo, name='enviar_correo'),
 
 ]
 

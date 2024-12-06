@@ -14,7 +14,7 @@ class LoginForm(forms.Form):
                 'oninput': "validarCaracteresProhibidos(this)",  # Llama a la función JavaScript
             }))
 
-# forms.py
+
 class TicketForm(forms.ModelForm):
  
     class Meta:
@@ -118,6 +118,7 @@ class TicketForm(forms.ModelForm):
         
         return cleaned_data
 
+    # Sobrescribimos el método save() para insertar datos en las tablas relacionadas
     def save(self, commit=True):
         # Primero guardamos los datos en las tablas relacionadas
         descripcion = Descripcion.objects.create(desc_c_nombre=self.cleaned_data['descripcion_nombre'])
@@ -255,6 +256,7 @@ class TicketEditForm(forms.ModelForm):
             descripcion = Descripcion.objects.create(desc_c_nombre=descripcion_texto)
             ticket.descripcion = descripcion
 
+        # Editar o crear el tiempo
         tiempo_inicio = self.cleaned_data.get('tiempo_inicio')
         tiempo_fin = self.cleaned_data.get('tiempo_fin')
         tiempo_duracion = self.cleaned_data.get('tiempo_duracion')
