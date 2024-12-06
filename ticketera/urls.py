@@ -11,6 +11,8 @@ urlpatterns = [
     path('tickets/<int:pk>/', views.TicketDetailView.as_view(), name='ticket_detail'),
     path('tickets/<int:pk>/edit/', views.TicketUpdateView.as_view(), name='ticket_edit'),
     path('login/', views.login),
-    path('logout/', views.logout, name='logout')
+    path('ticketReportes/', views.ticket_reportes),
+    path('enviar-correo/', views.enviar_correo, name='enviar_correo'),
+    path('logout/', views.logout, name='logout'),
 
 ]

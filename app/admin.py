@@ -1,5 +1,6 @@
 from django.contrib import admin
 from app.models import Cliente, Departamento, Descripcion, Equipo,Perfil,Prioridad, Tiempo, TipoTicket,Requerimiento, Usuario,Ticket,Estado
+from django.contrib.auth.models import User
 
 
 # Register your models here.

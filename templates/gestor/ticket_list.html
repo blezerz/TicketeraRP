@@ -10,21 +10,21 @@
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background-color: #e3f2fd; /* Fondo azul claro */
+            background-color: #e3f2fd;
             display: flex;
             flex-direction: column;
-            min-height: 100vh; /* Altura mínima de toda la página */
+            min-height: 100vh;
         }
 
         #main-pag {
             display: flex;
-            flex: 1; /* Asegura que el contenido principal ocupe todo el espacio disponible */
+            flex: 1;
         }
 
         #menu-lateral {
             width: 16%;
             min-width: 200px;
-            background-color: #00796b; /* Color oscuro del menú */
+            background-color: #00796b;
             color: white;
             padding: 20px 15px;
             display: flex;
@@ -35,7 +35,6 @@
         #menu-lateral h1 {
             font-size: 1.5rem;
             margin-bottom: 20px;
-            margin-top: 20px;
             color: #ffffff;
             text-align: center;
         }
@@ -48,29 +47,17 @@
             padding: 10px 15px;
             border-radius: 5px;
             display: block;
-            text-align: left;
             transition: background-color 0.3s ease;
         }
 
         #menu-lateral a:hover {
-            background-color: #004d40; /* Color más oscuro al pasar el mouse */
-        }
-
-        #menu-lateral .menu-footer {
-            text-align: center;
-            font-size: 0.9rem;
-            color: #b2dfdb;
-        }
-
-        #menu-lateral .menu-footer a {
-            color: #80cbc4;
-            text-decoration: none;
+            background-color: #004d40;
         }
 
         .main-content {
-            flex: 1; /* Ocupa todo el espacio disponible */
+            flex: 1;
             padding: 20px;
-            background-color: rgba(255, 255, 255, 0.8); /* Fondo blanco con opacidad */
+            background-color: rgba(255, 255, 255, 0.8);
         }
 
         .main-content h1 {
@@ -101,50 +88,24 @@
             background-color: #f9f9f9;
         }
 
-        .ticket-table td a {
-            color: #00796b;
-            text-decoration: none;
-            margin-right: 10px;
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
         }
 
-        .ticket-table td a:hover {
-            color: #004d40;
-        }
-
-        .no-tickets {
-            text-align: center;
-            font-size: 1.2rem;
+        .pagination .page-item .page-link {
             color: #00796b;
         }
 
-        button {
+        .pagination .page-item.active .page-link {
             background-color: #00796b;
             color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
         }
 
-        button:hover {
-            background-color: #004d40;
-        }
-
-        footer {
+        .pagination .page-item .page-link:hover {
             background-color: #004d40;
             color: white;
-            padding: 20px;
-            text-align: center;
-        }
-
-        footer a {
-            color: #80cbc4;
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
         }
     </style>
 </head>
@@ -162,6 +123,7 @@
             <div class="menu-footer">
                 <p>&copy; 2024 Ticketera</p>
                 <a href="#">Soporte</a>
+                <a href="{% url 'logout' %}" class="btn btn-danger">Cerrar sesión</a>
             </div>
         </div>
 
@@ -181,7 +143,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for ticket in tickets %}
+                    {% for ticket in page_obj.object_list %}
                         <tr>
                             <td>{{ ticket.id }}</td>
                             <td>{{ ticket.usuario }}</td>
@@ -195,12 +157,35 @@
                             </td>
                         </tr>
                     {% empty %}
-                        <tr class="no-tickets">
-                            <td colspan="7">No hay tickets disponibles.</td>
+                        <tr>
+                            <td colspan="7" class="text-center">No hay tickets disponibles.</td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
+
+            <!-- Controles de paginación -->
+            <nav class="pagination">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+                        </li>
+                    {% endif %}
+
+                    {% for page_num in page_obj.paginator.page_range %}
+                        <li class="page-item {% if page_num == page_obj.number %}active{% endif %}">
+                            <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                        </li>
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
         </div>
     </div>
     <footer>

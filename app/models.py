@@ -88,6 +88,7 @@ class Usuario(models.Model):
     usuar_b_estado = models.BooleanField(default=True)
     usuar_n_rut = models.IntegerField(null=True, blank=True)
     password = models.CharField(max_length=12, default='secret')
+    email = models.EmailField(max_length=255, unique=True)
 
     def __str__(self):
         return self.usuar_c_nombre
@@ -102,6 +103,7 @@ class Ticket(models.Model):
     requerimiento = models.ForeignKey(Requerimiento, on_delete=models.SET_NULL, null=True, blank=True)
     tipo_ticket = models.ForeignKey(TipoTicket, on_delete=models.SET_NULL, null=True, blank=True)
     cliente = models.ForeignKey(Cliente, on_delete=models.SET_NULL, null=True, blank=True)
+    
 
     def __str__(self):
         return f"Ticket {self.id}"

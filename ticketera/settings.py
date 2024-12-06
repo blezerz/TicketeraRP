@@ -117,3 +117,13 @@ STATICFILES_DIRS=[STATIC_DIR]
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+# Configuración de correo SMTP
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.office365.com'  # Servidor SMTP de Outlook
+EMAIL_PORT = 587                   # Puerto SMTP para conexiones TLS
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'byron.cerda05@inacapmail.cl'  # Cambia por tu dirección de correo
+EMAIL_HOST_PASSWORD = '4L1c3.3r3n'  # Cambia por tu contraseña o clave de aplicación
