@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib import messages
 from .forms import TicketForm, TicketEditForm, LoginForm, RequerimientoForm, RequerimientoEditForm, TicketFilterForm, RequerimientoFilterForm
-from .models import Ticket, Usuario, Requerimiento
+from .models import Ticket, Usuario, Requerimiento,Estado
 from django.views.generic import DetailView, UpdateView, ListView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -31,11 +31,6 @@ def enviar_correo_dinamico(asunto, mensaje, destinatario):
         return False
 
 
-
-
-
-
-
 def enviar_correo(request):
     subject = 'Asunto del correo'
     message = 'Este es el contenido del correo.'
@@ -47,6 +42,8 @@ def enviar_correo(request):
         return HttpResponse("Correo enviado exitosamente.")
     except Exception as e:
         return HttpResponse(f"Error al enviar el correo: {e}")
+    
+    
 def login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -62,8 +59,19 @@ def login(request):
                     # Iniciar sesión
                     request.session['usuario_id'] = usuario.id
                     request.session['usuario_nombre'] = usuario.usuar_c_nombre
+                    request.session['usuario_perfil'] = usuario.perfil.perf_c_nombre  # Guardar el perfil en la sesión
+
                     messages.success(request, f"Bienvenido, {usuario.usuar_c_nombre}")
-                    return redirect('/tickets')  # Redirige a la lista de tickets
+                    
+                    # Redirigir según el perfil del usuario
+                    if usuario.perfil.perf_c_nombre == 'Gestor':
+                        return redirect('/tickets/') #redirecciona gestor
+                    elif usuario.perfil.perf_c_nombre == 'Trabajador':
+                        return redirect('/mis-tickets/') #redirecciona trabajador
+                    else:
+                        messages.error(request, "Perfil no autorizado.")
+                        return redirect('/login/')
+
                 else:
                     # Contraseña incorrecta
                     messages.error(request, "Contraseña incorrecta.")
@@ -78,6 +86,7 @@ def login(request):
     return render(request, 'login.html', {'form': form})
 
 
+
 def logout(request):
     # Cierra la sesión del usuario
     request.session.flush()  # Elimina todos los datos de la sesión actual
@@ -85,7 +94,7 @@ def logout(request):
     return redirect('/login/') 
 
 
-
+#AQUI COMIENZAN LAS VISTAS PARA GESTOR
 
 class TicketCreateView(View):
     def get(self, request):
@@ -130,6 +139,11 @@ class TicketCreateView(View):
 class TicketListView(View): 
     def get(self, request):
         if 'usuario_id' not in request.session:
+            return redirect('/login/')
+        
+        # Verificar si el usuario tiene el perfil de Gestor
+        if request.session.get('usuario_perfil') != 'Gestor':
+            messages.error(request, "Acceso no autorizado.")
             return redirect('/login/')
         
         # Crear el formulario de filtros
@@ -283,3 +297,49 @@ class RequerimientoUpdateView(UpdateView):
     def form_invalid(self, form):
         messages.error(self.request, "Ocurrió un error al actualizar el requerimiento.")
         return super().form_invalid(form)
+    
+#AQUI TERMINAN LAS VISTAS PARA GESTOR
+#-----------------------------------------
+#AQUI COMIENZAN LAS VISTAS PARA TRABAJADOR
+
+class WorkerTicketListView(View): 
+    template_name = 'trabajador/worker_ticket_list.html'
+    def get(self, request):
+        if 'usuario_id' not in request.session:
+            return redirect('/login/')
+        
+        # Verificar si el usuario tiene el perfil de Trabajador
+        if request.session.get('usuario_perfil') != 'Trabajador':
+            messages.error(request, "Acceso no autorizado.")
+            return redirect('/login/')
+        
+        usuario_id = request.session.get('usuario_id')
+
+        # Mostrar solo los tickets que le pertenecen al trabajador
+        tickets = Ticket.objects.filter(usuario_id=usuario_id)
+        
+        paginator = Paginator(tickets, 10)  
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number) 
+
+        return render(request, 'trabajador/worker_ticket_list.html', {
+            'tickets': page_obj,
+        })
+
+def actualizar_estado_ticket(request, ticket_id):
+    if request.method == 'POST':
+        nuevo_estado = request.POST.get('estado')  # El valor enviado desde el formulario
+        ticket = get_object_or_404(Ticket, id=ticket_id)
+
+        # Obtener la instancia de Estado correspondiente
+        estado = get_object_or_404(Estado, estado_c_nombre=nuevo_estado)
+
+        # Asignar la instancia de Estado al ticket
+        ticket.estado = estado
+        ticket.save()
+
+        messages.success(request, f"El estado del ticket {ticket.id} se actualizó a {nuevo_estado}.")
+    else:
+        messages.error(request, "Método no permitido.")
+    
+    return redirect('worker_ticket_list')

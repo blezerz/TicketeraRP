@@ -191,7 +191,7 @@
             <form method="post" novalidate>
                 {% csrf_token %}
                 {{ form.as_p }}
-                <button type="submit" class="btn btn-primary">Guardar</button>
+                <button type="submit" class="btn btn-primary" style="background-color: #00796b;">Guardar</button>
                 <a href="{% url 'ticket_reque' %}" class="btn btn-secondary">Cancelar</a>
             </form>
         </div>

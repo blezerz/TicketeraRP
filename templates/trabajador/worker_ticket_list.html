@@ -238,83 +238,56 @@
             </div>
         </div>
 
-        <!-- Contenido principal -->
+        <!-- Sección de mensajes de éxito o error -->
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
         <div class="main-content">
-            <h1>Lista de Tickets</h1>
-            <div class="filter-container">
-                <form method="get" action="" class="filter-form">
-                    <div>
-                        <label for="{{ form.cliente.id_for_label }}">{{ form.cliente.label }}</label>
-                        {{ form.cliente }}
-                    </div>
-                    <div>
-                        <label for="{{ form.estado.id_for_label }}">{{ form.estado.label }}</label>
-                        {{ form.estado }}
-                    </div>
-                    <div>
-                        <label for="{{ form.prioridad.id_for_label }}">{{ form.prioridad.label }}</label>
-                        {{ form.prioridad }}
-                    </div>
-                    <div>
-                        <button type="submit" class="btn btn-primary" style="background-color: #00796b;" >Filtrar</button>
-                    </div>
-                </form>
-            </div>
-            <table class="ticket-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Usuario</th>
-                        <th>Cliente</th>
-                        <th>Estado</th>
-                        <th>Prioridad</th>
-                        <th>Tipo</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for ticket in page_obj.object_list %}
+            <!-- Tabla de tickets -->
+            <section>
+                <table>
+                    <thead>
                         <tr>
-                            <td>{{ ticket.id }}</td>
-                            <td>{{ ticket.usuario }}</td>
-                            <td>{{ ticket.cliente }}</td>
-                            <td>{{ ticket.estado }}</td>
-                            <td>{{ ticket.prioridad }}</td>
-                            <td>{{ ticket.tipo_ticket }}</td>
-                            <td>
-                                <a href="{% url 'ticket_detail' ticket.id %}" class="btn btn-info btn-sm">Ver</a>
-                                <a href="{% url 'ticket_edit' ticket.id %}" class="btn btn-warning btn-sm">Editar</a>
-                            </td>
+                            <th>ID</th>
+                            <th>Asunto</th>
+                            <th>Descripción</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
                         </tr>
-                    {% empty %}
-                        <tr class="no-tickets">
-                            <td colspan="7">No hay tickets disponibles.</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <!-- Controles de paginación -->
-            <nav class="pagination">
-                <ul class="pagination">
-                    {% if page_obj.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
-                        </li>
-                    {% endif %}
-
-                    {% for page_num in page_obj.paginator.page_range %}
-                        <li class="page-item {% if page_num == page_obj.number %}active{% endif %}">
-                            <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
-                        </li>
-                    {% endfor %}
-
-                    {% if page_obj.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
+                    </thead>
+                    <tbody>
+                        {% for ticket in tickets %}
+                            <tr>
+                                <td>{{ ticket.id }}</td>
+                                <td>{{ ticket.asunto }}</td>
+                                <td>{{ ticket.descripcion }}</td>
+                                <td>{{ ticket.get_estado_display }}</td>
+                                <td>
+                                    <!-- Formulario para cambiar el estado del ticket -->
+                                    <form action="{% url 'actualizar_estado_ticket' ticket.id %}" method="post">
+                                        {% csrf_token %}
+                                        <select name="estado">
+                                            <option value="Pendiente" {% if ticket.estado.estado_c_nombre == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+                                            <option value="Iniciado" {% if ticket.estado.estado_c_nombre == 'Iniciado' %}selected{% endif %}>Iniciado</option>
+                                            <option value="En Espera" {% if ticket.estado.estado_c_nombre == 'En Espera' %}selected{% endif %}>En Espera</option>
+                                            <option value="Finalizado" {% if ticket.estado.estado_c_nombre == 'Finalizado' %}selected{% endif %}>Finalizado</option>
+                                        </select>
+                                        <button type="submit">Actualizar estado</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5">No tienes tickets asignados.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
         </div>
     </div>
     <footer>

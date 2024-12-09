@@ -18,6 +18,9 @@ urlpatterns = [
     path('login/', views.login),
     path('logout/', views.logout, name='logout'),
     path('enviar-correo/', views.enviar_correo, name='enviar_correo'),
+    path('mis-tickets/', views.WorkerTicketListView.as_view(template_name='trabajador/worker_ticket_list.html'), name='worker_ticket_list'),
+    path('tickets/actualizar_estado/<int:ticket_id>/', views.actualizar_estado_ticket, name='actualizar_estado_ticket'),
+
 
 ]
 
